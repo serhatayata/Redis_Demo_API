@@ -25,7 +25,6 @@ namespace Redis_Demo_API.Services.Concrete
             };
 
             _client = ConnectionMultiplexer.Connect(options);
-
         }
 
         #region Get<T>
@@ -46,7 +45,6 @@ namespace Redis_Demo_API.Services.Concrete
         public async Task<T> GetAsync<T>(string key) where T : class
         {
             string value = await _client.GetDatabase().StringGetAsync(key);
-
             return value.ToObject<T>();
         }
         #endregion
@@ -86,7 +84,25 @@ namespace Redis_Demo_API.Services.Concrete
             _client.GetDatabase().KeyDelete(key);
         }
         #endregion
+        #region ScanKeysAsync
+        public async Task<List<string>> ScanKeysAsync(string match, string count)
+        {
+            var schemas = new List<string>();
+            int nextCursor = 0;
+            do
+            {
+                RedisResult redisResult = await _client.GetDatabase().ExecuteAsync("SCAN", nextCursor.ToString(), "MATCH", match, "COUNT", count);
+                var innerResult = (RedisResult[])redisResult;
 
+                nextCursor = int.Parse((string)innerResult[0]);
+                List<string> resultLines = ((string[])innerResult[1]).ToList();
+                schemas.AddRange(resultLines);
+            }
+            while (nextCursor != 0);
+
+            return schemas;
+        }
+        #endregion
 
     }
 }

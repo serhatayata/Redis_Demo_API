@@ -62,6 +62,13 @@
         /// </summary>
         /// <param name="key"></param>
         void Remove(string key);
+        /// <summary>
+        /// Specific set of keys 
+        /// </summary>
+        /// <param name="match"></param>
+        /// <param name="count"></param>
+        /// <returns></returns>
+        Task<List<string>> ScanKeysAsync(string match, string count);
         
     }
 }
